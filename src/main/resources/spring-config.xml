@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    		http://www.springframework.org/schema/beans/spring-beans.xsd
+     		http://www.springframework.org/schema/tx
+			http://www.springframework.org/schema/tx/spring-tx.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd
+			http://www.springframework.org/schema/mvc
+			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath:property/important.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="contentNegotiationManager"
+          class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+        <property name="favorPathExtension" value="false"/>
+        <property name="ignoreAcceptHeader" value="true"/>
+        <property name="defaultContentType" value="text/html"/>
+        <property name="mediaTypes">
+            <map>
+                <entry key="json" value="application/json"/>
+                <entry key="html" value="text/html"/>
+                <entry key="xml" value="application/xml"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="contentNegotiationManager" ref="contentNegotiationManager"/>
+        <property name="defaultViews">
+            <list>
+                <bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- locale related -->
+    <bean id="localeResolver"
+          class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+        <property name="cookieName" value="_clientlocale"/>
+        <property name="defaultLocale" value="zh_CN"/>
+        <property name="cookieMaxAge" value="2147483647"/>
+    </bean>
+
+    <!-- Access resource bundles with the specified basename -->
+    <bean id="messageSource"
+          class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+        <property name="cacheSeconds" value="5"/>
+    </bean>
+
+    <!-- SpringMVC上传文件时，需要配置MultipartResolver处理器 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 配置上传文件最大尺寸为1000MB -->
+        <property name="maxUploadSize" value="1048576000"/>
+        <!-- 设置在文件上传时允许写到内存中的最大值，以字节为单位计算，默认是10240 -->
+        <property name="maxInMemorySize" value="40960000"/>
+        <!-- 表示用来解析request请求的默认编码格式，当没有指定的时候根据Servlet规范会使用默认值ISO-8859-1。 -->
+        <!-- 当request自己指明了它的编码格式的时候就会忽略这里指定的defaultEncoding -->
+        <property name="defaultEncoding" value="UTF-8"/>
+    </bean>
+
+    <mvc:annotation-driven/>
+    <mvc:default-servlet-handler/>
+
+    <context:annotation-config />
+    <context:component-scan base-package="com.zj"/>
+
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.zj.dao" />
+        <property name="sqlSessionTemplateBeanName" value="sqlTemplate" />
+        <property name="annotationClass" value="org.springframework.stereotype.Repository"/>
+    </bean>
+
+    <bean id="parentDataSource" abstract="true" class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
+          destroy-method="close">
+        <property name="driverClassName" value="${jdbcDriverClass}"/>
+        <property name="filters" value="stat"/>
+        <property name="maxActive" value="${jdbcMaxActive}"/>
+        <property name="initialSize" value="${jdbcInitialSize}"/>
+        <property name="maxWait" value="${jdbcMaxWait}"/>
+        <property name="minIdle" value="${jdbcMinIdle}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbcTimeBetweenEvictionRunsMillis}"/>
+        <property name="minEvictableIdleTimeMillis" value="${jdbcMinEvictableIdleTimeMillis}"/>
+        <property name="validationQuery" value="SELECT 1"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testOnReturn" value="false"/>
+    </bean>
+
+    <!-- 数据源1 -->
+    <bean id="dataSource" parent="parentDataSource">
+        <property name="url" value="${jdbcUrl}"/>
+        <property name="username" value="${jdbcUsername}"/>
+        <property name="password" value="${jdbcPassword}"/>
+    </bean>
+
+    <!-- 数据源2 -->
+    <bean id="pdlDataSource" parent="parentDataSource">
+        <property name="url" value="${pdlJdbcUrl}"/>
+        <property name="username" value="${pdlJdbcUserName}"/>
+        <property name="password" value="${pdlJdbcPassword}"/>
+    </bean>
+
+    <!-- 事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--<bean id="pdlTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="pdlDataSource"/>
+    </bean>-->
+
+    <!-- 映射文件 -->
+    <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:sqlmap/tqDbMapper.xml"/>
+    </bean>
+   <!-- <bean id="pdlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="pdlDataSource"/>
+        <property name="configLocation" value="classpath:sqlmap/pdlDbMapper.xml"/>
+    </bean>-->
+
+    <!-- sql模板 -->
+    <bean id="sqlTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sessionFactory"/>
+    </bean>
+   <!-- <bean id="pdlSqlTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="pdlSessionFactory"/>
+    </bean>-->
+
+    <!-- 启用对spring事务的注解支持 -->
+    <tx:annotation-driven/>
+
+</beans>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zj.dao.SysUserDao">
+
+	<!-- sys_user 所有查询列 -->
+	<sql id="QUERY_COLUMN_LIST">
+		<![CDATA[id,user_name AS userName,password,mobile,account,user_status AS userStatus,last_login AS lastLogin,gmt_create AS gmtCreate,gmt_modify AS gmtModify]]>
+	</sql>
+
+	<!-- sys_user 查询列来源表-->
+	<sql id="QUERY_FROM_TABLE"><![CDATA[FROM sys_user]]></sql>
+
+	<!-- 全部条件(更多功能可以通过queryData扩展实现)  -->
+	<sql id="QUERY_WHERE_CLAUSE">
+		<where>
+			<if test="id != null and id != ''"><![CDATA[AND id = #{id}]]></if>
+			<if test="userName != null and userName != ''"><![CDATA[AND user_name like CONCAT('%',#{userName},'%')]]></if>
+			<if test="password != null and password != ''"><![CDATA[AND password = #{password}]]></if>
+			<if test="mobile != null and mobile != ''"><![CDATA[AND mobile like CONCAT('%',#{mobile},'%') ]]></if>
+			<if test="account != null and account != ''"><![CDATA[AND account = #{account} ]]></if>
+			<if test="userStatus != null and userStatus != ''"><![CDATA[AND user_status = #{userStatus}]]></if>
+			<if test="lastLogin != null and lastLogin != ''"><![CDATA[AND last_login = #{lastLogin}]]></if>
+			<if test="gmtCreate != null and gmtCreate != ''"><![CDATA[AND gmt_create = #{gmtCreate}]]></if>
+			<if test="gmtModify != null and gmtModify != ''"><![CDATA[AND gmt_modify = #{gmtModify}]]></if>
+			<!--<if test="queryData != null and queryData.selfId != null and queryData.selfId != '' "><![CDATA[AND id != #{queryData.selfId}]]></if>-->
+		</where>
+	</sql>
+
+	<!-- 更新列字段,只要不为NULL则更新,除开主键列 -->
+	<sql id="UPDATE_COLUMN_SET">
+		<set>
+			<if test="userName != null"><![CDATA[user_name = #{userName},]]></if>
+			<if test="password != null"><![CDATA[password = #{password},]]></if>
+			<if test="mobile != null"><![CDATA[mobile = #{mobile},]]></if>
+			<if test="account != null"><![CDATA[account = #{account},]]></if>
+			<if test="userStatus != null"><![CDATA[user_status = #{userStatus},]]></if>
+			<if test="lastLogin != null"><![CDATA[last_login = #{lastLogin},]]></if>
+			<if test="gmtCreate != null"><![CDATA[gmt_create = #{gmtCreate},]]></if>
+			<if test="gmtModify != null"><![CDATA[gmt_modify = #{gmtModify},]]></if>
+		</set>
+	</sql>
+
+	<!-- 插入sys_user记录 -->
+	<insert id="insertEntry" parameterType="sysUser" >
+		<![CDATA[
+			INSERT INTO sys_user (id,user_name,password,mobile,account,user_status,last_login,gmt_create,gmt_modify)
+			VALUES (#{id},#{userName},#{password},#{mobile},#{account},#{userStatus},#{lastLogin},#{gmtCreate},#{gmtModify})
+		]]>
+	</insert>
+
+	<!-- 删除记录,主键IN(array) -->
+	<delete id="deleteById" parameterType="sysUser" >
+		<![CDATA[DELETE FROM sys_user WHERE id = #{id}]]>
+	</delete>
+
+	<!-- 修改记录通过主键 -->
+	<update id="updateById" parameterType="sysUser" >
+		<![CDATA[UPDATE sys_user]]>
+		<include refid="UPDATE_COLUMN_SET"/>
+		<![CDATA[WHERE id = #{id}]]>
+	</update>
+
+	<!-- 查询,通过主键IN(array) -->
+	<select id="selectListByIds" parameterType="java.lang.reflect.Array" resultType="sysUser">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN_LIST"/>
+		<include refid="QUERY_FROM_TABLE"/>
+		<![CDATA[WHERE id IN]]>
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			<![CDATA[#{id}]]>
+		</foreach>
+	</select>
+
+	<!-- 查询,通过条件 -->
+	<select id="selectEntryList" parameterType="sysUser" resultType="sysUser">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN_LIST"/>
+		<include refid="QUERY_FROM_TABLE"/>
+		<include refid="QUERY_WHERE_CLAUSE"/>
+	</select>
+
+</mapper>

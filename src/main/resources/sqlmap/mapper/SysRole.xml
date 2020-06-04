@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zj.dao.SysRoleDao">
+
+	<!-- sys_role 所有查询列 -->
+	<sql id="QUERY_COLUMN_LIST">
+		<![CDATA[id,role_name AS roleName,role_code AS roleCode,gmt_create AS gmtCreate,gmt_modify AS gmtModify]]>
+	</sql>
+
+	<!-- sys_role 查询列来源表-->
+	<sql id="QUERY_FROM_TABLE"><![CDATA[FROM sys_role]]></sql>
+
+	<!-- 全部条件(更多功能可以通过queryData扩展实现)  -->
+	<sql id="QUERY_WHERE_CLAUSE">
+		<where>
+			<if test="id != null and id != ''"><![CDATA[AND id = #{id}]]></if>
+			<if test="roleName != null and roleName != ''"><![CDATA[AND role_name = #{roleName}]]></if>
+			<if test="roleCode != null and roleCode != ''"><![CDATA[AND role_code = #{roleCode}]]></if>
+			<if test="gmtCreate != null and gmtCreate != ''"><![CDATA[AND gmt_create = #{gmtCreate}]]></if>
+			<if test="gmtModify != null and gmtModify != ''"><![CDATA[AND gmt_modify = #{gmtModify}]]></if>
+		</where>
+	</sql>
+
+	<!-- 更新列字段,只要不为NULL则更新,除开主键列 -->
+	<sql id="UPDATE_COLUMN_SET">
+		<set>
+			<if test="roleName != null"><![CDATA[role_name = #{roleName},]]></if>
+			<if test="roleCode != null"><![CDATA[role_code = #{roleCode},]]></if>
+			<if test="gmtCreate != null"><![CDATA[gmt_create = #{gmtCreate},]]></if>
+			<if test="gmtModify != null"><![CDATA[gmt_modify = #{gmtModify},]]></if>
+		</set>
+	</sql>
+
+	<!-- 插入sys_role记录 -->
+	<insert id="insertEntry" parameterType="sysRole" >
+		<![CDATA[
+			INSERT INTO sys_role (id,role_name,role_code,gmt_create,gmt_modify)
+			VALUES (#{id},#{roleName},#{roleCode},#{gmtCreate},#{gmtModify})
+		]]>
+	</insert>
+
+	<!-- 删除记录 -->
+	<delete id="deleteById" parameterType="sysRole" >
+		<![CDATA[DELETE FROM sys_role WHERE id = #{id}]]>
+	</delete>
+
+	<!-- 修改记录通过主键 -->
+	<update id="updateById" parameterType="sysRole" >
+		<![CDATA[UPDATE sys_role]]>
+		<include refid="UPDATE_COLUMN_SET"/>
+		<![CDATA[WHERE id = #{id}]]>
+	</update>
+
+	<!-- 查询,通过主键IN(array) -->
+	<select id="selectListByIds" parameterType="java.lang.reflect.Array" resultType="sysRole">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN_LIST"/>
+		<include refid="QUERY_FROM_TABLE"/>
+		<![CDATA[WHERE id IN]]>
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			<![CDATA[#{id}]]>
+		</foreach>
+	</select>
+
+	<!-- 查询,通过条件 -->
+	<select id="selectEntryList" parameterType="sysRole" resultType="sysRole">
+		<![CDATA[SELECT]]>
+		<include refid="QUERY_COLUMN_LIST"/>
+		<include refid="QUERY_FROM_TABLE"/>
+		<include refid="QUERY_WHERE_CLAUSE"/>
+	</select>
+
+</mapper>

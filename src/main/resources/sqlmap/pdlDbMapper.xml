@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+    <settings>
+        <!-- 全局映射器启用缓存 -->
+        <setting name="cacheEnabled" value="true"/>
+        <!-- 对于未知的SQL查询，允许返回不同的结果集以达到通用的效果 -->
+        <setting name="multipleResultSetsEnabled" value="true"/>
+        <!-- 允许使用列标签代替列名 -->
+        <setting name="useColumnLabel" value="true"/>
+        <!--全局启用或禁用延迟加载，禁用时所有关联对象都会即时加载-->
+        <setting name="lazyLoadingEnabled" value="false"/>
+        <!-- 数据库超过25000秒仍未响应则超时 -->
+        <setting name="defaultStatementTimeout" value="25000"/>
+    </settings>
+
+    <!-- 全局别名设置 -->
+    <typeAliases>
+    </typeAliases>
+
+    <!-- 映射文件路径 -->
+    <mappers>
+    </mappers>
+</configuration>
